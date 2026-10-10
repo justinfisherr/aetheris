@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, Float, Html, Stars } from "@react-three/drei";
 import * as THREE from "three";
@@ -280,7 +280,7 @@ export default function LanguageIslands() {
     const n = data.domains.length;
     return data.domains.map((_, i) => {
       const a = (i / n) * Math.PI * 2;
-      const rad = 12 + (n % 2 === 0 ? (i % 2) * 2 : 0);
+      const rad = 9 + (n % 2 === 0 ? (i % 2) * 2 : 0);
       return [Math.cos(a) * rad, Math.sin(i * 1.7) * 0.8, Math.sin(a) * rad] as [
         number,
         number,
@@ -316,33 +316,34 @@ export default function LanguageIslands() {
       <Canvas
         shadows
         dpr={[1, 2]}
-        camera={{ position: [0, 16, 24], fov: 42 }}
+        camera={{ position: [0, 13, 18], fov: 45 }}
         onPointerMissed={() => setSelected(null)}
       >
         <color attach="background" args={["#f3d9c0"]} />
-        <fog attach="fog" args={["#f3d9c0", 40, 95]} />
+        <fog attach="fog" args={["#f3d9c0", 30, 80]} />
         <hemisphereLight args={["#ffe9c9", "#4a6b5a", 1.05]} />
         <directionalLight position={[8, 14, 6]} intensity={2.0} color="#fff0d4" castShadow shadow-mapSize={[1024, 1024]} />
         <ambientLight intensity={0.3} />
 
-        {data?.domains.map((d, i) => (
-          <DomainIsland
-            key={d.id}
-            domain={d}
-            position={positions[i]!}
-            selected={selected === d.id}
-            onSelect={setSelected}
-          />
-        ))}
-
-        <Stars radius={60} depth={30} count={1200} factor={2.5} fade speed={0.4} />
-        <Environment preset="sunset" />
+        <Suspense fallback={null}>
+          {data?.domains.map((d, i) => (
+            <DomainIsland
+              key={d.id}
+              domain={d}
+              position={positions[i]!}
+              selected={selected === d.id}
+              onSelect={setSelected}
+            />
+          ))}
+          <Stars radius={60} depth={30} count={1200} factor={2.5} fade speed={0.4} />
+          <Environment preset="sunset" />
+        </Suspense>
         <CameraRig target={selectedTarget} />
         <OrbitControls
           makeDefault
           enablePan={false}
-          minDistance={14}
-          maxDistance={50}
+          minDistance={9}
+          maxDistance={40}
           minPolarAngle={Math.PI / 5}
           maxPolarAngle={Math.PI / 1.8}
           enableDamping

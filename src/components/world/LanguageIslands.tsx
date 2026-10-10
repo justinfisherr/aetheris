@@ -299,7 +299,7 @@ export default function LanguageIslands() {
       <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between p-5 sm:p-8">
         <header>
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary">Your Korean, floating</p>
-          <h1 className="font-display text-3xl leading-tight text-foreground sm:text-5xl">Language Islands</h1>
+          <h1 className="font-display text-3xl leading-tight text-foreground sm:text-5xl">Korean Islands</h1>
           <p className="mt-2 max-w-xs text-sm text-muted-foreground">
             {data
               ? `${data.total_words} words across ${data.domains.length} domains · drag to orbit, tap an island.`

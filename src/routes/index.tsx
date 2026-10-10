@@ -7,13 +7,13 @@ const LanguageIslands = lazy(() => import("@/components/world/LanguageIslands"))
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Language Islands — Your Korean Vocabulary, Floating" },
+      { title: "Korean Islands — Your Korean Vocabulary, Floating" },
       {
         name: "description",
         content:
           "Orbit a floating archipelago of your Korean vocabulary. Each island is a domain; its size is word count, its greenery is how healthy the cards are.",
       },
-      { property: "og:title", content: "Language Islands — Your Korean Vocabulary, Floating" },
+      { property: "og:title", content: "Korean Islands — Your Korean Vocabulary, Floating" },
       {
         property: "og:description",
         content: "A 3D archipelago of your Korean vocab, grown from your Anki deck.",

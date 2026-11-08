@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Environment, Float, Html, Stars } from "@react-three/drei";
+import { OrbitControls, Environment, Html, Stars } from "@react-three/drei";
 import * as THREE from "three";
 
 /* ------------------------------- data types -------------------------------- */
@@ -112,69 +112,73 @@ function DomainIsland({
   }, [treeCount, domain.id]);
 
   const [hovered, setHovered] = useState(false);
+  const grp = useRef<THREE.Group>(null);
+  useEffect(() => {
+    const w = new THREE.Vector3();
+    grp.current?.getWorldPosition(w);
+    console.log("ISLPOS", domain.id, position, w.toArray().map(n => +n.toFixed(1)));
+  }, []);
 
   return (
-    <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.8}>
-      <group position={position} scale={scale}>
-        <mesh geometry={rockGeo} position={[0, -1.6, 0]} rotation={[Math.PI, 0, 0]} castShadow>
-          <meshStandardMaterial color="#7a6149" flatShading roughness={1} />
-        </mesh>
-        <mesh
-          position={[0, 0.55, 0]}
-          castShadow
-          receiveShadow
-          onPointerOver={(e) => {
-            e.stopPropagation();
-            setHovered(true);
-            document.body.style.cursor = "pointer";
-          }}
-          onPointerOut={() => {
-            setHovered(false);
-            document.body.style.cursor = "auto";
-          }}
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            onSelect(domain.id);
-          }}
-        >
-          <cylinderGeometry args={[2.55, 2.45, 0.62, 12]} />
-          <meshStandardMaterial color={grass} flatShading roughness={0.9} />
-        </mesh>
-        {trees.map((t, i) => (
-          <group key={i} position={t.p} scale={t.s}>
-            <mesh position={[0, 0.45, 0]} castShadow>
-              <cylinderGeometry args={[0.06, 0.1, 0.9, 6]} />
-              <meshStandardMaterial color="#6b4632" flatShading roughness={1} />
+    <group ref={grp} position={position} scale={scale}>
+      <mesh geometry={rockGeo} position={[0, -1.6, 0]} rotation={[Math.PI, 0, 0]} castShadow>
+        <meshStandardMaterial color="#7a6149" flatShading roughness={1} />
+      </mesh>
+      <mesh
+        position={[0, 0.55, 0]}
+        castShadow
+        receiveShadow
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = "auto";
+        }}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          onSelect(domain.id);
+        }}
+      >
+        <cylinderGeometry args={[2.55, 2.45, 0.62, 12]} />
+        <meshStandardMaterial color={grass} flatShading roughness={0.9} />
+      </mesh>
+      {trees.map((t, i) => (
+        <group key={i} position={t.p} scale={t.s}>
+          <mesh position={[0, 0.45, 0]} castShadow>
+            <cylinderGeometry args={[0.06, 0.1, 0.9, 6]} />
+            <meshStandardMaterial color="#6b4632" flatShading roughness={1} />
+          </mesh>
+          {[0, 1, 2].map((k) => (
+            <mesh key={k} position={[0, 1.0 + k * 0.4, 0]} castShadow>
+              <coneGeometry args={[0.5 - k * 0.13, 0.55, 6]} />
+              <meshStandardMaterial color={leaf} flatShading roughness={0.95} />
             </mesh>
-            {[0, 1, 2].map((k) => (
-              <mesh key={k} position={[0, 1.0 + k * 0.4, 0]} castShadow>
-                <coneGeometry args={[0.5 - k * 0.13, 0.55, 6]} />
-                <meshStandardMaterial color={leaf} flatShading roughness={0.95} />
-              </mesh>
-            ))}
-          </group>
-        ))}
+          ))}
+        </group>
+      ))}
 
-        {/* floating label */}
-        <Html center distanceFactor={14} position={[0, 2.6, 0]} zIndexRange={[20, 0]}>
-          <button
-            onClick={() => onSelect(domain.id)}
-            className={`pointer-events-auto whitespace-nowrap rounded-full border px-3.5 py-1.5 text-left backdrop-blur transition-all ${
-              selected || hovered
-                ? "border-primary/70 bg-card/95 shadow-xl"
-                : "border-border/50 bg-card/75"
-            }`}
-          >
-            <span className="block text-[12px] font-semibold leading-tight text-card-foreground">
-              {domain.name}
-            </span>
-            <span className="block text-[10px] leading-tight text-muted-foreground">
-              {domain.name_native} · {domain.size} words
-            </span>
-          </button>
-        </Html>
-      </group>
-    </Float>
+      {/* floating label */}
+      <Html center distanceFactor={14} position={[0, 2.6, 0]} zIndexRange={[20, 0]}>
+        <button
+          onClick={() => onSelect(domain.id)}
+          className={`pointer-events-auto whitespace-nowrap rounded-full border px-3.5 py-1.5 text-left backdrop-blur transition-all ${
+            selected || hovered
+              ? "border-primary/70 bg-card/95 shadow-xl"
+              : "border-border/50 bg-card/75"
+          }`}
+        >
+          <span className="block text-[12px] font-semibold leading-tight text-card-foreground">
+            {domain.name}
+          </span>
+          <span className="block text-[10px] leading-tight text-muted-foreground">
+            {domain.name_native} · {domain.size} words
+          </span>
+        </button>
+      </Html>
+    </group>
   );
 }
 
@@ -183,8 +187,25 @@ function DomainIsland({
 function CameraRig({ target }: { target: [number, number, number] }) {
   const dest = useRef(new THREE.Vector3(...target));
   dest.current.set(target[0], target[1], target[2]);
+  const logged = useRef(false);
+  const t = useRef(0);
   useFrame(({ camera, controls }) => {
     const c = controls as unknown as { target: THREE.Vector3; update: () => void } | null;
+    t.current += 1;
+    if (!logged.current && t.current > 120) {
+      logged.current = true;
+      const dir = new THREE.Vector3();
+      camera.getWorldDirection(dir);
+      const p = new THREE.Vector3(6, 0, 0);
+      const ndc = p.clone().project(camera);
+      console.log("CAMDEBUG2", JSON.stringify({
+        pos: camera.position.toArray().map(n => +n.toFixed(1)),
+        dir: dir.toArray().map(n => +n.toFixed(2)),
+        target: c ? c.target.toArray().map(n => +n.toFixed(1)) : null,
+        proj60: ndc.toArray().map(n => +n.toFixed(2)),
+        fov: camera.fov,
+      }));
+    }
     if (!c || !c.target) return;
     const prev = c.target.clone();
     if (prev.distanceTo(dest.current) < 0.01) return;
@@ -280,7 +301,7 @@ export default function LanguageIslands() {
     const n = data.domains.length;
     return data.domains.map((_, i) => {
       const a = (i / n) * Math.PI * 2;
-      const rad = 9 + (n % 2 === 0 ? (i % 2) * 2 : 0);
+      const rad = 6 + (n % 2 === 0 ? (i % 2) * 1.5 : 0);
       return [Math.cos(a) * rad, Math.sin(i * 1.7) * 0.8, Math.sin(a) * rad] as [
         number,
         number,
@@ -325,27 +346,29 @@ export default function LanguageIslands() {
         <directionalLight position={[8, 14, 6]} intensity={2.0} color="#fff0d4" castShadow shadow-mapSize={[1024, 1024]} />
         <ambientLight intensity={0.3} />
 
-        <Suspense fallback={null}>
-          {data?.domains.map((d, i) => (
-            <DomainIsland
-              key={d.id}
-              domain={d}
-              position={positions[i]!}
-              selected={selected === d.id}
-              onSelect={setSelected}
-            />
-          ))}
-          <Stars radius={60} depth={30} count={1200} factor={2.5} fade speed={0.4} />
-          <Environment preset="sunset" />
-        </Suspense>
+        <mesh position={[0, 1, 0]}>
+          <boxGeometry args={[3, 3, 3]} />
+          <meshBasicMaterial color="#ff00ff" />
+        </mesh>
+
+        {data?.domains.map((d, i) => (
+          <DomainIsland
+            key={d.id}
+            domain={d}
+            position={positions[i]!}
+            selected={selected === d.id}
+            onSelect={setSelected}
+          />
+        ))}
+
         <CameraRig target={selectedTarget} />
         <OrbitControls
           makeDefault
           enablePan={false}
           minDistance={9}
           maxDistance={40}
-          minPolarAngle={Math.PI / 5}
-          maxPolarAngle={Math.PI / 1.8}
+          minPolarAngle={Math.PI / 6}
+          maxPolarAngle={Math.PI / 2.2}
           enableDamping
           dampingFactor={0.06}
           autoRotate={!selected}
